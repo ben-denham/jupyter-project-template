@@ -28,7 +28,9 @@ RUN useradd --uid $USER_ID --gid coder --shell /bin/bash --create-home coder
 USER coder
 
 ENV PATH=$PATH:/home/coder/.local/bin
-RUN pip install poetry poetry-plugin-bundle
+RUN pip install poetry
+# Poetry will install the virtualenv into .venv
+ENV POETRY_VIRTUALENVS_IN_PROJECT=true
 
 RUN mkdir /home/coder/src
 WORKDIR /home/coder/src
@@ -42,13 +44,20 @@ RUN ln -s /home/coder/src/app/voila-template /home/coder/.local/share/jupyter/vo
 # package your entire app into a self-contained Docker image that can
 # be run on another machine.
 FROM dev_image as prod_image
-
-# Copy in pre-built venv and activate venv:
-# https://pythonspeed.com/articles/activate-virtualenv-dockerfile/
-COPY --chown=coder:coder app/.venv /home/coder/src/app/.venv
-ENV VIRTUAL_ENV=/home/coder/src/app/.venv
+COPY --chown=coder:coder .venv /home/coder/src/.venv
+COPY --chown=coder:coder pyproject.toml /home/coder/src/pyproject.toml
+COPY --chown=coder:coder poetry.lock /home/coder/src/poetry.lock
+# Install poetry dependencies (not project source) into .venv, and
+# use .venv from host to prevent re-downloading each time.
+RUN --mount=type=bind,source=.venv,target=/home/coder/src/.venv \
+    poetry install --sync --no-dev --no-root --no-directory
+ENV VIRTUAL_ENV=/home/coder/src/.venv
 RUN python -m venv $VIRTUAL_ENV
-ENV PATH="/home/coder/src/app/.venv/bin:$PATH"
+ENV PATH="/home/coder/src/.venv/bin:$PATH"
+
+# Mount lib source code
+COPY --chown=coder:coder lib /home/coder/src/lib
+RUN poetry install --sync --no-dev
 
 # Mount changeable notebook and template content last.
 COPY --chown=coder:coder app/voila-app.py /home/coder/src/app/voila-app.py

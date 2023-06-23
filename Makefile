@@ -2,12 +2,13 @@
 BASE_IMAGE_NAME=myproject
 
 PROD_IMAGE_NAME=$(BASE_IMAGE_NAME)-prod
-POETRY_CACHE_DIR=`command -v poetry >/dev/null 2>&1 && poetry config cache-dir || echo ".poetry"`
+POETRY_CACHE_DIR=`command -v poetry >/dev/null 2>&1 && poetry config cache-dir || echo '.poetry'`
 
 .PHONY: env build deps deps-update clear-build dev stop bash sudo-bash run-bash run-sudo-bash lint test mypy check prod-build prod-run prod-run-bash prod-run-sudo-bash prod-export-image prod-import-image
 
 # Building and dependencies
 env:
+	if [ ! -d "$(POETRY_CACHE_DIR)" ]; then mkdir "$(POETRY_CACHE_DIR)"; fi
 	if [ ! -f ".env" ]; then echo "BASE_IMAGE_NAME=${BASE_IMAGE_NAME}\nPOETRY_CACHE_DIR=${POETRY_CACHE_DIR}" > .env; fi
 build: env
 	docker-compose build \
@@ -53,11 +54,10 @@ check: lint test mypy
 
 # Production/deployable app
 prod-build: env
-	@echo "Bundling Python source code and dependencies into app/.venv"
-	docker-compose run --rm jupyter poetry bundle venv --without dev app/.venv
 	@echo "Clearing output from app notebooks"
 	docker-compose run --rm jupyter app/clean-notebooks.sh
 	docker build \
+		--progress=plain \
 		--build-arg GROUP_ID=`id -g` \
 		--build-arg USER_ID=`id -u` \
 		--target prod_image -t $(PROD_IMAGE_NAME) .
