@@ -122,6 +122,11 @@ An HTML code-coverage reported will be generated for each module at:
 You can run [mypy](https://mypy.readthedocs.io/en/stable/)
 type-checking on your modules with: `make mypy`.
 
+## Exporting Notebooks
+
+You can run `make notebook-export` to generate HTML copies of your
+notebooks in `notebooks/export`, with code-cell toggling.
+
 ## Deployment
 
 If you want to package up the Voilà app as a self-contained Docker

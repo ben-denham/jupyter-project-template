@@ -4,6 +4,7 @@
 app/images/
 app/.venv/
 .coverage
+notebooks/export/
 
 # Files that may contain sensitive information
 .env

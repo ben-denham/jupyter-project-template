@@ -1,0 +1,79 @@
+{%- extends 'lab/index.html.j2' -%}
+
+{%- block html_head_css -%}
+  {{ super() }}
+  <style type="text/css">
+    .codecell-collapse-wrapper .codecell-collapse-button {
+      background: none;
+      border: none;
+    }
+    .codecell-collapse-wrapper .codecell-collapse-button .collapsed-content {
+      display: none;
+    }
+    .codecell-collapse-wrapper.collapsed .codecell-collapse-button .collapsed-content {
+      display: initial;
+    }
+    .codecell-collapse-wrapper.collapsed .codecell-collapse-button .expanded-content {
+      display: none;
+    }
+    .codecell-collapse-wrapper.collapsed .jp-Cell .jp-InputPrompt {
+       visibility: hidden;
+    }
+    .codecell-collapse-wrapper.collapsed .jp-Cell .jp-Editor {
+       display: none;
+    }
+  </style>
+{%- endblock html_head_css -%}
+
+{%- block body_header -%}
+  {{ super() }}
+  <button class="codecell-toggle-all-button">Toggle all code cells</button>
+{%- endblock body_header -%}
+
+{% block codecell %}
+   <div class="codecell-collapse-wrapper collapsed">
+     <button class="codecell-collapse-button">
+       <span class="collapsed-content">▶ Show code cell</span>
+       <span class="expanded-content">▼ Hide code cell</span>
+     </button>
+     {{ super() }}
+   </div>
+{% endblock codecell %}
+
+{%- block footer_js -%}
+  {{ super() }}
+   <script type="text/javascript">
+    function codecellToggleAllButtonHandler() {
+      var codecellWrappers = Array.from(document.querySelectorAll('.codecell-collapse-wrapper'));
+      var allCollapsed = codecellWrappers.every(function(wrapper) {
+        return wrapper.classList.contains('collapsed');
+      });
+      codecellWrappers.forEach(function(wrapper) {
+        if (allCollapsed) {
+          wrapper.classList.remove('collapsed');
+        }
+        else {
+          wrapper.classList.add('collapsed');
+        }
+      });
+    }
+
+    function codecellCollapseButtonHandler() {
+      if (this.parentElement.classList.contains('collapsed')) {
+        this.parentElement.classList.remove('collapsed');
+      }
+      else {
+        this.parentElement.classList.add('collapsed');
+      }
+    }
+
+    window.addEventListener('load', function() {
+      var codecellToggleAllButton = document.querySelector('.codecell-toggle-all-button');
+      var codecellButtons = document.querySelectorAll('.codecell-collapse-button');
+      codecellButtons.forEach(function(button) {
+        button.addEventListener('click', codecellCollapseButtonHandler);
+      });
+      codecellToggleAllButton.addEventListener('click', codecellToggleAllButtonHandler);
+    });
+  </script>
+{%- endblock footer_js -%}

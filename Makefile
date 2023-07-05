@@ -50,7 +50,13 @@ test:
 		--cov-report=term ;
 mypy:
 	docker-compose run --rm jupyter poetry run mypy lib/*
-check: lint test mypy
+check: lint mypy test
+
+# Exporting notebooks
+notebook-export:
+	docker-compose run --rm --workdir /home/coder/src/notebooks jupyter \
+		poetry run jupyter nbconvert --template nbconvert_tpl --to html --output-dir export \
+		*.ipynb
 
 # Production/deployable app
 prod-build: env
