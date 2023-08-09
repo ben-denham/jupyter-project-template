@@ -27,6 +27,13 @@
 
 {%- block body_header -%}
   {{ super() }}
+  <noscript>
+    <p style="font-size: 3em; color: red; padding-bottom: 1em;">
+      Warning: JavaScript has not been loaded, so rich content like
+      charts will not be visible. Please download this .html file and
+      open it directly with your web browser.
+    </p>
+  </noscript>
   <button class="codecell-toggle-all-button">Toggle all code cells</button>
 {%- endblock body_header -%}
 
