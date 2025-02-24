@@ -6,6 +6,9 @@ app/.venv/
 .coverage
 notebooks/export/
 
+# Notebooks with outputs
+notebooks/**/*.ipynb
+
 # Files that may contain sensitive information
 .env
 

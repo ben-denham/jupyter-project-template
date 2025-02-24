@@ -22,7 +22,7 @@ clear-build:
 	docker compose rm
 
 # Running the development environment
-dev: deps
+dev: deps notebook-sync
 	docker compose up
 stop:
 	docker compose stop
@@ -52,11 +52,13 @@ mypy:
 	docker compose run --rm jupyter poetry run mypy lib/*
 check: lint mypy test
 
-# Exporting notebooks
+# Notebook utilities
 notebook-export:
 	docker compose run --rm --workdir /home/coder/src/notebooks jupyter \
 		poetry run jupyter nbconvert --template nbconvert_tpl --to html --output-dir export \
 		*.ipynb
+notebook-sync:
+	docker compose run --rm jupyter /bin/bash -c "shopt -s globstar && poetry run jupytext --sync notebooks/**/*.ipynb"
 
 # Production/deployable app
 prod-build: env

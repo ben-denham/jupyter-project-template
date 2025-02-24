@@ -19,7 +19,9 @@ Jupyter notebooks. Ideal for data science projects.
 ## Project Structure
 
 * `lib/` - Python modules containing the primary source code.
-* `notebooks/` - Notebooks used during development.
+* `notebooks/` - `.ipynb` notebooks used during development.
+* `script_notebooks/` - `.py` notebooks that are version-controlled
+  and paired with the `.ipynb` files in `notebooks/`
 * `app/` - Files for the deployable Voilà application.
 * `tests/` - Tests for the Python modules in `lib/`.
 * `data/` - Directory for storing development data files referenced by
@@ -152,15 +154,23 @@ directory so that they are not committed to your Git repository and
 not transmitted to the Docker daemon during image builds (see
 [.dockerignore](#dockerignore)).
 
-You may not want to commit the outputs of notebook cells to your Git
-repository. If you have Python 3 installed, you can use
-[nbstripout](https://github.com/kynan/nbstripout) to configure your
-Git repository to exclude the outputs of notebook cells when running
-`git add`:
+In order to not commit the outputs of notebooks cells to your Git
+repository, `.ipynb` files in `notebooks/` are not tracked in Git.
+Instead, [jupytext](https://jupytext.readthedocs.io/en/latest/) is
+used to sync notebooks with `.py` files that are tracked in Git (which
+have the added benefit of producing simpler diffs and merges).
 
-1. `python3 -m pip install nbstripout nbconvert`
-2. Run `nbstripout --install` in this directory (installs hooks into
-   `.git`).
+* Any time you create/save a notebook under `notebooks/` in
+  JupyterLab, a corresponding percent-style `.py` file under
+  `script_notebooks/` will be created/updated.
+* When opening a notebook under `notebooks/` in JupyterLab, cell
+  inputs will be loaded from whichever of the `.ipynb` or `.py` was
+  updated most recently, and cell outputs will only be retained for
+  cells when the cell input has not changed.
+* You can run `make notebook-sync` manually to sync the contents of
+  `notebooks/` and `script_notebooks/`.
+* This configuration is managed in the `[tool.jupytext.formats]`
+  section of `pyproject.toml`.
 
 ## Notes About Docker
 
