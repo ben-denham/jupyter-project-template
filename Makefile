@@ -11,57 +11,57 @@ env:
 	if [ ! -d "$(POETRY_CACHE_DIR)" ]; then mkdir "$(POETRY_CACHE_DIR)"; fi
 	if [ ! -f ".env" ]; then echo "BASE_IMAGE_NAME=${BASE_IMAGE_NAME}\nPOETRY_CACHE_DIR=${POETRY_CACHE_DIR}" > .env; fi
 build: env
-	docker-compose build \
+	docker compose build \
 		--build-arg GROUP_ID=`id -g` \
 		--build-arg USER_ID=`id -u`
 deps: build
-	docker-compose run --rm jupyter poetry install --sync
+	docker compose run --rm jupyter poetry install --sync
 deps-update: build
-	docker-compose run --rm jupyter poetry update
+	docker compose run --rm jupyter poetry update
 clear-build:
-	docker-compose rm
+	docker compose rm
 
 # Running the development environment
 dev: deps
-	docker-compose up
+	docker compose up
 stop:
-	docker-compose stop
+	docker compose stop
 
 # Starting a shell in a Docker container (must be run with
 # a `service=[app|jupyter]` argument)
 check-service:
 	@if [ -z "$(service)" ]; then echo "Please set service=[app|jupyter]"; exit 1; fi
 bash: check-service
-	docker-compose exec $(service) /bin/bash
+	docker compose exec $(service) /bin/bash
 sudo-bash: check-service
-	docker-compose exec --user root $(service) /bin/bash
+	docker compose exec --user root $(service) /bin/bash
 run-bash: check-service
-	docker-compose run --rm $(service) /bin/bash
+	docker compose run --rm $(service) /bin/bash
 run-sudo-bash: check-service
-	docker-compose run --user root --rm $(service) /bin/bash
+	docker compose run --user root --rm $(service) /bin/bash
 
 # Python module utilities
 lint:
-	docker-compose run --rm jupyter poetry run flake8 lib/*
+	docker compose run --rm jupyter poetry run flake8 lib/*
 test:
-	docker-compose run --rm jupyter poetry run pytest \
+	docker compose run --rm jupyter poetry run pytest \
 		--cov="lib" \
 		--cov-report="html:tests/coverage" \
 		--cov-report=term ;
 mypy:
-	docker-compose run --rm jupyter poetry run mypy lib/*
+	docker compose run --rm jupyter poetry run mypy lib/*
 check: lint mypy test
 
 # Exporting notebooks
 notebook-export:
-	docker-compose run --rm --workdir /home/coder/src/notebooks jupyter \
+	docker compose run --rm --workdir /home/coder/src/notebooks jupyter \
 		poetry run jupyter nbconvert --template nbconvert_tpl --to html --output-dir export \
 		*.ipynb
 
 # Production/deployable app
 prod-build: env
 	@echo "Clearing output from app notebooks"
-	docker-compose run --rm jupyter app/clean-notebooks.sh
+	docker compose run --rm jupyter app/clean-notebooks.sh
 	docker build \
 		--progress=plain \
 		--build-arg GROUP_ID=`id -g` \
