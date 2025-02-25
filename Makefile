@@ -2,22 +2,22 @@
 BASE_IMAGE_NAME=myproject
 
 PROD_IMAGE_NAME=$(BASE_IMAGE_NAME)-prod
-POETRY_CACHE_DIR=`command -v poetry >/dev/null 2>&1 && poetry config cache-dir || echo '.poetry'`
+UV_CACHE_DIR=`command -v uv >/dev/null 2>&1 && uv cache dir || echo '.uv'`
 
 .PHONY: env build deps deps-update clear-build dev stop bash sudo-bash run-bash run-sudo-bash lint test mypy check prod-build prod-run prod-run-bash prod-run-sudo-bash prod-export-image prod-import-image
 
 # Building and dependencies
 env:
-	if [ ! -d "$(POETRY_CACHE_DIR)" ]; then mkdir "$(POETRY_CACHE_DIR)"; fi
-	if [ ! -f ".env" ]; then echo "BASE_IMAGE_NAME=${BASE_IMAGE_NAME}\nPOETRY_CACHE_DIR=${POETRY_CACHE_DIR}" > .env; fi
+	if [ ! -d "$(UV_CACHE_DIR)" ]; then mkdir "$(UV_CACHE_DIR)"; fi
+	if [ ! -f ".env" ]; then echo "BASE_IMAGE_NAME=${BASE_IMAGE_NAME}\nUV_CACHE_DIR=${UV_CACHE_DIR}" > .env; fi
 build: env
 	docker compose build \
 		--build-arg GROUP_ID=`id -g` \
 		--build-arg USER_ID=`id -u`
 deps: build
-	docker compose run --rm jupyter poetry install --sync
+	docker compose run --rm jupyter uv sync
 deps-update: build
-	docker compose run --rm jupyter poetry update
+	docker compose run --rm jupyter uv lock --upgrade
 clear-build:
 	docker compose rm
 
@@ -42,23 +42,23 @@ run-sudo-bash: check-service
 
 # Python module utilities
 lint:
-	docker compose run --rm jupyter poetry run flake8 lib/*
+	docker compose run --rm jupyter uv run flake8 src/* script_notebooks/*
 test:
-	docker compose run --rm jupyter poetry run pytest \
-		--cov="lib" \
+	docker compose run --rm jupyter uv run pytest \
+		--cov="src" \
 		--cov-report="html:tests/coverage" \
 		--cov-report=term ;
 mypy:
-	docker compose run --rm jupyter poetry run mypy lib/*
+	docker compose run --rm jupyter uv run mypy src/* script_notebooks/*
 check: lint mypy test
 
 # Notebook utilities
 notebook-export:
-	docker compose run --rm --workdir /home/coder/src/notebooks jupyter \
-		poetry run jupyter nbconvert --template nbconvert_tpl --to html --output-dir export \
+	docker compose run --rm --workdir /home/coder/src/notebooks jupyter uv run \
+		jupyter nbconvert --template nbconvert_tpl --to html --output-dir export \
 		*.ipynb
 notebook-sync:
-	docker compose run --rm jupyter /bin/bash -c "shopt -s globstar && poetry run jupytext --sync notebooks/**/*.ipynb"
+	docker compose run --rm jupyter /bin/bash -c "shopt -s globstar && uv run jupytext --sync notebooks/**/*.ipynb"
 
 # Production/deployable app
 prod-build: env

@@ -28,9 +28,7 @@ RUN useradd --uid $USER_ID --gid coder --shell /bin/bash --create-home coder
 USER coder
 
 ENV PATH=$PATH:/home/coder/.local/bin
-RUN pip install poetry
-# Poetry will install the virtualenv into .venv
-ENV POETRY_VIRTUALENVS_IN_PROJECT=true
+RUN pip install uv
 
 RUN mkdir /home/coder/src
 WORKDIR /home/coder/src
@@ -46,23 +44,17 @@ RUN ln -s /home/coder/src/app/voila-template /home/coder/.local/share/jupyter/vo
 FROM dev_image as prod_image
 COPY --chown=coder:coder .venv /home/coder/src/.venv
 COPY --chown=coder:coder pyproject.toml /home/coder/src/pyproject.toml
-COPY --chown=coder:coder poetry.lock /home/coder/src/poetry.lock
-# Install poetry dependencies (not project source) into .venv, and
-# use .venv from host to prevent re-downloading each time.
-RUN --mount=type=bind,source=.venv,target=/home/coder/src/.venv \
-    poetry install --sync --no-dev --no-root --no-directory
+COPY --chown=coder:coder uv.lock /home/coder/src/uv.lock
+COPY --chown=coder:coder src /home/coder/src/src
 ENV VIRTUAL_ENV=/home/coder/src/.venv
 RUN python -m venv $VIRTUAL_ENV
 ENV PATH="/home/coder/src/.venv/bin:$PATH"
-
-# Mount lib source code
-COPY --chown=coder:coder lib /home/coder/src/lib
-RUN poetry install --sync --no-dev
+RUN uv sync --no-dev
 
 # Mount changeable notebook and template content last.
 COPY --chown=coder:coder app/voila-app.py /home/coder/src/app/voila-app.py
 COPY --chown=coder:coder app/voila-template /home/coder/src/app/voila-template
-COPY --chown=coder:coder app/voila-notebooks/*.ipynb /home/coder/src/app/voila-notebooks/
+COPY --chown=coder:coder notebooks/voila/*.ipynb /home/coder/src/notebooks/voila/
 
 EXPOSE 8866
 CMD ["python", "app/voila-app.py"]

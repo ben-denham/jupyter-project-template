@@ -9,10 +9,10 @@ services:
       - '127.0.0.1:8866:8866'
     volumes:
       - .:/home/coder/src
-      - "${POETRY_CACHE_DIR}:/home/coder/.cache/pypoetry"
+      - "${UV_CACHE_DIR}:/home/coder/.cache/uv"
     environment:
       - VOILA_DEBUG=true
-    command: ["poetry", "run", "python", "app/voila-app.py"]
+    command: ["uv", "run", "python", "app/voila-app.py"]
   jupyter:
     image: "${BASE_IMAGE_NAME}-dev"
     build:
@@ -23,8 +23,8 @@ services:
       - '127.0.0.1:8888:8888'
     volumes:
       - .:/home/coder/src
-      - "${POETRY_CACHE_DIR}:/home/coder/.cache/pypoetry"
+      - "${UV_CACHE_DIR}:/home/coder/.cache/uv"
     environment:
       - JUPYTERLAB_SETTINGS_DIR=/home/coder/src/jupyterlab/config
       - JUPYTERLAB_WORKSPACES_DIR=/home/coder/src/jupyterlab/workspaces
-    command: ["poetry", "run", "jupyter", "lab", "--ip", "0.0.0.0"]
+    command: ["uv", "run", "jupyter", "lab", "--ip", "0.0.0.0"]

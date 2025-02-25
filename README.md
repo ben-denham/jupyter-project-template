@@ -18,12 +18,12 @@ Jupyter notebooks. Ideal for data science projects.
 
 ## Project Structure
 
-* `lib/` - Python modules containing the primary source code.
+* `src/` - Python modules containing the primary source code.
 * `notebooks/` - `.ipynb` notebooks used during development.
 * `script_notebooks/` - `.py` notebooks that are version-controlled
   and paired with the `.ipynb` files in `notebooks/`
 * `app/` - Files for the deployable Voilà application.
-* `tests/` - Tests for the Python modules in `lib/`.
+* `tests/` - Tests for the Python modules in `src/`.
 * `data/` - Directory for storing development data files referenced by
   `notebooks/`.
 
@@ -69,7 +69,7 @@ into Git bash, then you should be able to run this project on Windows.
 
 In order to better structure and share Python code between Jupyter
 notebooks, you should primarily add code to custom Python
-packages/modules contained in the `lib/` directory. An example
+packages/modules contained in the `src/` directory. An example
 `mypymodule` is provided, but you can add more directories - if you
 do, just make sure to update the `packages` list in the
 `pyproject.toml`.
@@ -89,15 +89,15 @@ following cell at the top of each notebook:
 To add Python module dependencies:
 
 1. Start a shell inside a dev Docker container: `make run-bash service=jupyter`
-2. Use poetry to add the dependency: `poetry add <your-dependency>`
+2. Use uv to add the dependency: `uv add <your-dependency>`
 
 When `make dev` is run it will alway ensure all dependencies are
 installed, and you can also manually install dependencies by running:
 `make deps`.
 
-If you have poetry installed on your host, your `poetry config
-cache-dir` will be mounted into the Docker container in order to avoid
-re-downloading dependencies across projects.
+If you have uv installed on your host, your `uv cache dir` will be
+mounted into the Docker container in order to avoid re-downloading
+dependencies across projects.
 
 To update the versions of Python packages in use, run: `make
 deps-update`.
