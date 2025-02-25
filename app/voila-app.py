@@ -24,5 +24,5 @@ main(argv=[
     # (https://github.com/jupyter-widgets/ipywidgets/issues/2522#issuecomment-516434947).
     "--Voila.tornado_settings={\"websocket_max_message_size\": 104857600}",
     *debug_args,
-    "app/voila-notebooks",
+    "notebooks/voila",
 ])

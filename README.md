@@ -62,7 +62,7 @@ into Git bash, then you should be able to run this project on Windows.
 5. To view the development Voila server:
    1. Browse to http://localhost:8866
    2. You will see a list of available application notebooks to run
-      from `app/voila-notebooks` (you may add/edit these notebooks
+      from `notebooks/voila` (you may add/edit these notebooks
       through JupyterLab).
 
 ## Python Module Development
