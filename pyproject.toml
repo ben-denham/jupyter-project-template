@@ -30,4 +30,4 @@ packages = ["src/mypymodule"]
 
 [tool.jupytext.formats]
 "notebooks/" = "ipynb"
-"py_notebooks/" = "py:percent"
+"script_notebooks/" = "py:percent"
